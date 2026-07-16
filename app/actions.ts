@@ -7,7 +7,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/db";
 import { cafes, reviews } from "@/db/schema";
-import { resolveDeviceId } from "@/lib/device";
+import { getDeviceId, resolveDeviceId } from "@/lib/device";
+import { callerIp, checkRateLimit, type RateLimitKind } from "@/lib/ratelimit";
 import { cafeInput, reviewInput, slugify } from "@/lib/validation";
 
 /** Discriminated result consumed by useActionState in the forms. */
@@ -20,10 +21,25 @@ export type ActionState =
       fieldErrors: Record<string, string[] | undefined>;
     };
 
+/** Rate-limit by anonymous device identity when present, caller IP otherwise. */
+async function guardRate(kind: RateLimitKind): Promise<ActionState | null> {
+  const identifier = (await getDeviceId()) ?? (await callerIp());
+  const limit = await checkRateLimit(kind, identifier);
+  if (limit.ok) return null;
+  return {
+    status: "error",
+    message: `Too many requests — try again in ${limit.retryAfterSeconds}s.`,
+    fieldErrors: {},
+  };
+}
+
 export async function createReview(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const limited = await guardRate("review");
+  if (limited) return limited;
+
   const parsed = reviewInput.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
     return {
@@ -78,6 +94,9 @@ export async function createCafe(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const limited = await guardRate("cafe");
+  if (limited) return limited;
+
   const parsed = cafeInput.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
     return {
