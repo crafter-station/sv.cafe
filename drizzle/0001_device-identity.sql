@@ -1,0 +1,2 @@
+ALTER TABLE "reviews" ADD COLUMN "device_id" text;--> statement-breakpoint
+CREATE UNIQUE INDEX "reviews_cafe_device_uidx" ON "reviews" USING btree ("cafe_id","device_id") WHERE "reviews"."device_id" is not null;
