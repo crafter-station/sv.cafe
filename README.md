@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# sv.cafe ☕
 
-## Getting Started
+Community map of work-friendly cafés in El Salvador. Every café is rated on
+four dimensions — **Wi-Fi**, **Coffee**, **Outlets** (easy to plug a charger)
+and **Meetings** (calls & meetups friendly) — and shares its Wi-Fi network
+name with a tap-to-reveal password.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router, server actions) + Tailwind v4
+- **shadcn/ui** components with a midday-inspired monochrome theme (zero radius,
+  flat borders, mono-font labels, dark mode via next-themes)
+- **Drizzle ORM** over **Neon** Postgres (`@neondatabase/serverless`)
+- **Zod v4** validation + `@t3-oss/env-nextjs` typed env — all types derived
+  from the schema (`$inferSelect`, `z.infer`), no hand-written interfaces
+- **Mapbox GL** for the map
+
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+bun install
+bun run db:seed   # idempotent — seeds 8 San Salvador cafés
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Needs `.env.local` with `DATABASE_URL` (Neon) and `NEXT_PUBLIC_MAPBOX_TOKEN`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How it's wired
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `lib/ratings.ts` — single source of truth for rating dimensions; UI, forms
+  and validation derive from it.
+- `db/schema.ts` — `cafes` + `reviews`; `db/queries.ts` computes per-dimension
+  averages in SQL.
+- `app/actions.ts` — zod-validated server actions (`createReview`,
+  `createCafe`) with `revalidatePath`.
+- `/` — drawer-first explorer: map + list + ⌘K command palette; selecting a
+  café (list, pin, or ⌘K) opens an instant drawer (bottom sheet on mobile,
+  floating right sheet on desktop) — all data ships upfront, zero fetches.
+- `/cafes/[slug]` — deep-link page reusing the same details component;
+  `/cafes/new` — add a café (geolocation helper).
