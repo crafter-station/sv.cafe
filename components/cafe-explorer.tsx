@@ -7,6 +7,7 @@ import { CafeCard } from "@/components/cafe-card";
 import { CafeMap } from "@/components/cafe-map";
 import { CafeSheet } from "@/components/cafe-sheet";
 import { CommandMenu } from "@/components/command-menu";
+import { GithubStars } from "@/components/github-stars";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
@@ -59,6 +60,9 @@ export function CafeExplorer({
             </span>
             <Kbd className="hidden sm:inline-flex">⌘K</Kbd>
           </Button>
+          <div className="hidden sm:block">
+            <GithubStars />
+          </div>
           <ThemeToggle />
           <Button asChild>
             <Link href="/cafes/new">
