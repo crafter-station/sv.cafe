@@ -1,5 +1,18 @@
 # sv.cafe ☕
 
+```text
+       ) )
+      ( (
+       ) )
+   .----------.
+   |          |---.
+   |          |   |     sv.cafe
+   |          |---'     work-friendly cafés in El Salvador
+    \        /
+     '------'           $ rate --wifi --pass-reveal ─> on the map
+   ____________
+```
+
 Community map of work-friendly cafés in El Salvador. Every café is rated on
 four dimensions — **Wi-Fi**, **Coffee**, **Outlets** (easy to plug a charger)
 and **Meetings** (calls & meetups friendly) — and shares its Wi-Fi network
